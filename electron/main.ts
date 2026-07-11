@@ -35,7 +35,10 @@ app.on('before-quit', () => updates.stop());
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) void createWindow(); });
 
-handle('auth:start', async () => { const state = await github.startDeviceFlow(); if (state.status === 'authorized') await cloudSync.autoSetup(); return state; }); handle('auth:state', () => github.getAuth()); handle('auth:logout', () => github.logout());
+handle('auth:start', async () => { const state = await github.startDeviceFlow(); if (state.status === 'authorized') { await cloudSync.initialize(); await cloudSync.autoSetup(); const repos = await github.sync(); win?.webContents.send('repos:synced', repos); } return state; });
+handle('auth:state', () => github.getAuth()); handle('auth:accounts', () => github.getAccounts());
+handle('auth:switch', async (rawLogin) => { const state = await github.switchAccount(z.string().min(1).max(100).parse(rawLogin)); await cloudSync.initialize(); await cloudSync.autoSetup().catch(() => undefined); const repos = await github.sync().catch(() => github.list()); win?.webContents.send('repos:synced', repos); return state; });
+handle('auth:logout', async () => { await github.logout(); await cloudSync.initialize(); win?.webContents.send('repos:synced', github.list()); });
 handle('repos:list', () => github.list()); handle('repos:sync', () => github.sync()); handle('repos:details', (id) => github.details(idSchema.parse(id)));
 handle('workspace:load', () => store.workspace()); handle('workspace:command', (command) => store.command(commandSchema.parse(command) as WorkspaceCommand));
 handle('settings:load', () => store.settings()); handle('settings:update', (patch) => store.updateSettings(z.record(z.unknown()).parse(patch) as Partial<SettingsData>));

@@ -3,7 +3,7 @@ import type { ConstellationApi, GitHubRepo, UpdateState } from '../shared/types'
 
 const invoke = <T>(channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args) as Promise<T>;
 const api: ConstellationApi = {
-  auth: { startDeviceFlow: () => invoke('auth:start'), getState: () => invoke('auth:state'), logout: () => invoke('auth:logout') },
+  auth: { startDeviceFlow: () => invoke('auth:start'), getState: () => invoke('auth:state'), accounts: () => invoke('auth:accounts'), switch: (login) => invoke('auth:switch', login), logout: () => invoke('auth:logout') },
   repos: { sync: () => invoke('repos:sync'), list: () => invoke('repos:list'), getDetails: (id) => invoke('repos:details', id) },
   workspace: { load: () => invoke('workspace:load'), applyCommand: (command) => invoke('workspace:command', command) },
   settings: { load: () => invoke('settings:load'), update: (patch) => invoke('settings:update', patch) },

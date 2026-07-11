@@ -1,6 +1,6 @@
 {
   "name": "constellation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Bureau visuel local-first pour organiser et surveiller ses dépôts GitHub",
   "main": "dist-electron/main.js",
   "type": "module",

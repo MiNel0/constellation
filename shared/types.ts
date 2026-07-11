@@ -20,6 +20,7 @@ export interface RepoFilters { status?: ProjectStatus; visibility?: string; orga
 export interface WorkspaceData { version: 1; folders: WorkspaceFolder[]; customizations: Record<string, RepoCustomization>; collections: SavedCollection[]; updatedAt: string }
 export interface SettingsData { version: 1; theme: 'dark' | 'light'; scanRoots: string[]; editorCommand: string; inactivityDays: number; lastSyncAt: string | null; cloudSyncEnabled?: boolean; cloudSyncLastAt?: string | null }
 export interface AuthState { status: 'signed-out' | 'authorizing' | 'authorized' | 'denied' | 'expired' | 'revoked'; login?: string; avatarUrl?: string; verificationUri?: string; userCode?: string; error?: string }
+export interface AccountSummary { login: string; avatarUrl: string; active: boolean }
 export interface HealthAlert { id: string; severity: 'info' | 'warning' | 'error'; label: string; detail: string }
 export interface RepoHealth { repoNodeId: string; lastPushAt: string | null; openIssues: number; openPullRequests: number; defaultBranchCheck: CheckState; alerts: HealthAlert[] }
 export interface RepoContentEntry { name: string; path: string; type: 'file' | 'dir' | 'symlink' | 'submodule'; size: number; url: string }
@@ -40,7 +41,7 @@ export interface ScanResult { matches: Record<string, LocalRepoState>; unmatched
 export interface CloudSyncState { enabled: boolean; syncing: boolean; lastSyncAt: string | null; repository: string | null; error?: string }
 export interface UpdateState { phase: 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'up-to-date' | 'error'; currentVersion: string; version?: string; percent?: number; message?: string; error?: string }
 export interface ConstellationApi {
-  auth: { startDeviceFlow(): Promise<AuthState>; getState(): Promise<AuthState>; logout(): Promise<void> };
+  auth: { startDeviceFlow(): Promise<AuthState>; getState(): Promise<AuthState>; accounts(): Promise<AccountSummary[]>; switch(login: string): Promise<AuthState>; logout(): Promise<void> };
   repos: { sync(): Promise<GitHubRepo[]>; list(): Promise<GitHubRepo[]>; getDetails(nodeId: string): Promise<RepoDetails> };
   workspace: { load(): Promise<WorkspaceData>; applyCommand(command: WorkspaceCommand): Promise<WorkspaceData> };
   settings: { load(): Promise<SettingsData>; update(patch: Partial<SettingsData>): Promise<SettingsData> };

@@ -6,6 +6,7 @@ Constellation est un bureau visuel Windows, local-first, pour organiser et surve
 
 - connexion GitHub par Device Authorization Flow ;
 - dépôts personnels, privés et d’organisations ;
+- plusieurs comptes GitHub mémorisés avec bascule rapide et données isolées ;
 - bibliothèque avec dossiers et glisser-déposer ;
 - Kanban Idée / Actif / Pause / Terminé / Archivé ;
 - recherche, filtres, favoris et notes ;
@@ -49,4 +50,4 @@ Les fichiers `settings.enc`, `workspace.enc`, `github-cache.enc` et `credentials
 
 ## Limites V1
 
-Une seule identité GitHub est connectée à la fois. Constellation reste local-first et utilise un dépôt GitHub privé appartenant à l’utilisateur pour synchroniser automatiquement son organisation entre ses appareils.
+Plusieurs comptes GitHub peuvent être mémorisés, avec un seul profil actif à la fois. Constellation reste local-first et utilise un dépôt GitHub privé appartenant à chaque utilisateur pour synchroniser automatiquement son organisation entre ses appareils.

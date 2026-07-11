@@ -9,7 +9,7 @@ type RemoteFile = { content: string; sha: string };
 export class CloudSyncService {
   private state: CloudSyncState = { enabled: false, syncing: false, lastSyncAt: null, repository: null };
   constructor(private store: EncryptedStore, private github: GitHubService) {}
-  async initialize() { const settings = await this.store.settings(); this.state = { enabled: false, syncing: false, lastSyncAt: settings.cloudSyncLastAt ?? null, repository: null }; }
+  async initialize() { if (this.github.getAuth().status !== 'authorized') { this.state = { enabled: false, syncing: false, lastSyncAt: null, repository: null }; return; } const settings = await this.store.settings(); this.state = { enabled: false, syncing: false, lastSyncAt: settings.cloudSyncLastAt ?? null, repository: null }; }
   getState() { return this.state; }
   async autoSetup() {
     if (this.github.getAuth().status !== 'authorized') throw new Error('Connexion GitHub requise.');

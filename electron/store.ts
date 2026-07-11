@@ -1,5 +1,5 @@
 import { app, safeStorage } from 'electron';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type { GitHubRepo, SettingsData, WorkspaceCommand, WorkspaceData } from '../shared/types';
 
@@ -11,7 +11,11 @@ const defaults = {
 
 export class EncryptedStore {
   private base = join(app.getPath('userData'), 'data');
-  private path(name: string) { return join(this.base, `${name}.enc`); }
+  private activeProfile: string | null = null;
+  private path(name: string) { return this.activeProfile ? join(this.base, 'profiles', this.activeProfile, `${name}.enc`) : join(this.base, `${name}.enc`); }
+  private globalPath(name: string) { return join(this.base, `${name}.enc`); }
+  setActiveProfile(login: string | null) { this.activeProfile = login ? login.toLowerCase().replace(/[^a-z0-9-]/g, '-') : null; }
+  getActiveProfile() { return this.activeProfile; }
   async read<T>(name: 'settings' | 'workspace' | 'cache' | 'credentials' | 'sync-credentials', fallback: T): Promise<T> {
     try {
       const encrypted = await readFile(this.path(name));
@@ -29,6 +33,17 @@ export class EncryptedStore {
     await writeFile(temp, safeStorage.encryptString(JSON.stringify(value)));
     await rename(temp, target);
   }
+  async readGlobal<T>(name: 'accounts', fallback: T): Promise<T> { return this.readAt(this.globalPath(name), fallback); }
+  async writeGlobal<T>(name: 'accounts', value: T): Promise<void> { return this.writeAt(this.globalPath(name), value); }
+  async migrateLegacyProfile(login: string) {
+    this.setActiveProfile(login);
+    for (const name of ['settings', 'workspace', 'cache'] as const) {
+      try { await access(this.path(name)); continue; } catch { /* first migration */ }
+      const fallback = name === 'settings' ? defaults.settings() : name === 'workspace' ? defaults.workspace() : defaults.cache();
+      const legacy = await this.readAt(join(this.base, `${name}.enc`), fallback);
+      await this.write(name, legacy);
+    }
+  }
   settings() { return this.read('settings', defaults.settings()); }
   workspace() { return this.read('workspace', defaults.workspace()); }
   cache() { return this.read('cache', defaults.cache()); }
@@ -45,6 +60,14 @@ export class EncryptedStore {
       case 'delete-collection': data.collections = data.collections.filter((c) => c.id !== command.id); break;
     }
     data.updatedAt = new Date().toISOString(); await this.write('workspace', data); return data;
+  }
+  private async readAt<T>(target: string, fallback: T): Promise<T> {
+    try { const encrypted = await readFile(target); if (!safeStorage.isEncryptionAvailable()) throw new Error('Le chiffrement Windows est indisponible.'); return JSON.parse(safeStorage.decryptString(encrypted)) as T; }
+    catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return fallback; throw error; }
+  }
+  private async writeAt<T>(target: string, value: T): Promise<void> {
+    if (!safeStorage.isEncryptionAvailable()) throw new Error('Le chiffrement Windows est indisponible.');
+    const temp = `${target}.tmp`; await mkdir(dirname(target), { recursive: true }); await writeFile(temp, safeStorage.encryptString(JSON.stringify(value))); await rename(temp, target);
   }
 }
 
