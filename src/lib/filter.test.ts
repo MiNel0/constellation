@@ -1,0 +1,6 @@
+import { describe, expect, it } from 'vitest';
+import { matchesRepo } from './filter';
+import type { GitHubRepo, RepoCustomization } from '../../shared/types';
+const repo: GitHubRepo = { nodeId: 'R_1', id: 1, owner: 'MiNel0', name: 'vigie', fullName: 'MiNel0/vigie', description: 'Moniteur VPS', url: 'https://github.com/MiNel0/vigie', homepage: null, visibility: 'private', archived: false, fork: false, language: 'JavaScript', topics: ['electron'], pushedAt: null, updatedAt: '', defaultBranch: 'main', openIssues: 0, stars: 0, license: null, organization: null, permissions: { admin: true, push: true, pull: true } };
+const custom: RepoCustomization = { repoNodeId: 'R_1', folderId: null, status: 'active', color: null, favorite: true, notes: 'outil serveur', manualTags: ['vps'], localPath: 'C:/vigie', position: 0, ignoredAlerts: [] };
+describe('matchesRepo', () => { it('cherche dans les métadonnées locales et distantes', () => expect(matchesRepo(repo, custom, 'serveur', {})).toBe(true)); it('combine les filtres', () => expect(matchesRepo(repo, custom, '', { status: 'active', visibility: 'private', localOnly: true })).toBe(true)); it('rejette un statut différent', () => expect(matchesRepo(repo, custom, '', { status: 'paused' })).toBe(false)); });

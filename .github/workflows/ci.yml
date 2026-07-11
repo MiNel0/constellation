@@ -1,0 +1,14 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:dir
+        env:
+          CONSTELLATION_GITHUB_CLIENT_ID: Ov23liR5fYnmTUYD6aMD

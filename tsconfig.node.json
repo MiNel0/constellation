@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "composite": true, "skipLibCheck": true, "module": "ESNext", "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true, "strict": true, "target": "ES2022", "types": ["node"],
+    "noUnusedLocals": true, "noUnusedParameters": true, "noEmit": true
+  },
+  "include": ["vite.config.ts", "electron", "shared", "vitest.config.ts"]
+}

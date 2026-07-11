@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-electron/
+release/
+.env
+*.log
+*.tsbuildinfo
+build/constellation-icon-source.png
+build/icon-original.png
